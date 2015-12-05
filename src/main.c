@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "log.h"
 
 #define WIDTH 1280
 
@@ -9,7 +8,6 @@ using namespace std;
 
 int main()
 {
-    LogCreate();
 
     FILE *file;
     FILE *out;
@@ -20,7 +18,7 @@ int main()
     out = fopen("out", "w");
     if (file == NULL)
     {
-        LogErr("Error opening file");
+        printf("Error opening file\n");
     }
 
     key = (char *) malloc(sizeof(char) * 100);
@@ -29,7 +27,7 @@ int main()
     file = fopen("res/imagem_1280x720_imagemSteg_30x30_5bits.y", "r");
     if (file == NULL)
     {
-        LogErr("Error opening file");
+        printf("Error opening file\n");
     }
 
     while (!feof(file))
@@ -52,6 +50,7 @@ int main()
     }
 
     fclose(file);
+    free(key);
 
     return 0;
 }
