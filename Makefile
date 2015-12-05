@@ -1,2 +1,2 @@
 all:
-	gcc -o main main.c -g
+	g++ -o main main.cpp -std=c++11 -g
