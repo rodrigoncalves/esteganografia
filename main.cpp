@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <vector>
 
+// #define DEBUG
 using namespace std;
 
 FILE *outFile;
@@ -67,8 +68,10 @@ int main(int argc, char *argv[])
         }
     }
 
+    #ifdef DEBUG
     printf("total de bits: %d\n", total_bits);
     printf("total de grupos: %d\n", total_grupos);
+    #endif
 
     if (not bits.empty())
     {
@@ -76,10 +79,15 @@ int main(int argc, char *argv[])
 
         for (int i=0; i < bits.size()-CHAR_BIT; ++i)
         {
+            #ifdef DEBUG
             printf("%d", i+1);
+            #endif
             bits.push_back(0);
         }
+
+        #ifdef DEBUG
         printf("\n");
+        #endif
 
         char byte = convertToByte(bits);
         byte >>= sizeToMove;
