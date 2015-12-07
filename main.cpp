@@ -5,7 +5,7 @@
 #include <limits.h>
 #include <vector>
 
-// #define DEBUG
+#define DEBUG
 using namespace std;
 
 FILE *outFile;
@@ -53,18 +53,25 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
-    for (int lineblock=0; lineblock < height/3; lineblock++)
+    int k=-1;
+    for (int rowblock=0; rowblock < height/3; rowblock++)
     {
-        for (int i=0, j=0; i<width/3; i++, j+=3)
+        for (int colblock=0; colblock < width/3; colblock++)
         {
             total_grupos++;
-            int line = (key[i%strlen(key)]-'0'-1)%3;
-            if (line < 0) continue;
-            int column = (key[i%strlen(key)]-'0'-1)/3;
-            int posPixel = width*(lineblock*3) + line*width + j + column;
+            if (colblock < width) ++k;
+            int row = (key[k%strlen(key)]-'0'-1)%3;
+            if (row < 0) continue;
+            int col = (key[k%strlen(key)]-'0'-1)/3;
+            int posPixel = width*(rowblock*3 + row) + colblock*3 + col;
             fseek(imgFile, posPixel, SEEK_SET);
             char byte = fgetc(imgFile);
             getBits(nbits, byte);
+
+            #ifdef DEBUG
+            printf("%d\n", posPixel);
+            // printf("%c\n", byte);
+            #endif
         }
     }
 
