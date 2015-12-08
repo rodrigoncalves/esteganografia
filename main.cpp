@@ -3,9 +3,12 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+#include <vector>
 
-FILE *outFile;
+FILE *outFile, *hashFile;
+std::vector<char> hash;
 char bits[8];
+bool hash_mode = 0;
 
 void getBits(int, char);
 char convertToByte(char*);
@@ -36,6 +39,7 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
+    hashFile = fopen("hash.txt", "w+");
     outFile = fopen("out.y", "w+");
     fprintf(outFile, "P5 %d %d 255 ", steg_w, steg_h);
 
@@ -50,8 +54,8 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
-    int k=-1, pixels=0;
-    for (int row_block=0; pixels < steg_w * steg_h; row_block++)
+    long k=-1, pixels=0;
+    for (int row_block=0; pixels < steg_w * steg_h + 32; row_block++)
     {
         for (int col_block=0; col_block < img_w/3; col_block++)
         {
@@ -63,7 +67,14 @@ int main(int argc, char *argv[])
             fseek(imgFile, posPixel, SEEK_SET);
             char byte = fgetc(imgFile);
             getBits(nbits, byte);
-            if (++pixels == steg_w * steg_h) break;
+            ++pixels;
+            if (hash_mode)
+                printf("%d: %d\n", posPixel, key[k%strlen(key)]-'0');
+            if (pixels == steg_w * steg_h) {
+                hash_mode = 1;
+            } else if (pixels == steg_w * steg_h + 32) {
+                break;
+            }
         }
     }
 
@@ -77,14 +88,28 @@ int main(int argc, char *argv[])
 
 void getBits(int nbits, char byte)
 {
-    for (int i = 0; i < nbits; ++i)
-    {
-        char bit = (byte >> i) & 0x01;
-        bits[i] = bit;
-    }
+    if (hash_mode) {
+        for (int i = 0; i < nbits; ++i)
+        {
+            char bit = (byte >> i) & 0x01;
+            hash.push_back(bit);
 
-    char outByte = convertToByte(bits);
-    fprintf(outFile, "%c", outByte);
+            if (hash.size() == CHAR_BIT)
+            {
+                char byte = convertToByte(&hash[0]);
+                fprintf(hashFile, "%c", byte);
+                hash.clear();
+            }
+        }
+    } else {
+        for (int i = 0; i < nbits; ++i)
+        {
+            char bit = (byte >> i) & 0x01;
+            bits[i] = bit;
+        }
+        char outByte = convertToByte(bits);
+        fprintf(outFile, "%c", outByte);
+    }
 }
 
 char convertToByte(char* bits)
