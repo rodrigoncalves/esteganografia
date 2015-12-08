@@ -4,12 +4,8 @@
 #include <math.h>
 #include <limits.h>
 
-// #define DEBUG
-
 FILE *outFile;
 char bits[8];
-int total_bits=0;
-int total_groups=0;
 
 void getBits(int, char);
 char convertToByte(char*);
@@ -25,7 +21,7 @@ int main(int argc, char *argv[])
 
     if (argc < 4)
     {
-        printf("Usage: ./main <steg-width> <steg-height> <nbits>\n");
+        printf("Usage: ./main <steg-width> <steg-height> <bits>\n");
         exit(0);
     }
 
@@ -46,8 +42,8 @@ int main(int argc, char *argv[])
     key = (char *) malloc(sizeof(char) * 100);
     fgets(key, 100, keyFile);
 
-    // imgFile = fopen("res/teste_EsteganografiaLSB_1280x720_1bit.y", "r");
     imgFile = fopen("res/imagem_1280x720_imagemSteg_30x30_5bits.y", "r");
+    imgFile = fopen("res/video_1280x720_imagemSteg_1920x1080_4bits_chave1_comHash.y", "r");
     if (imgFile == NULL)
     {
         printf("Couldn't open image.\n");
@@ -55,27 +51,21 @@ int main(int argc, char *argv[])
     }
 
     int k=-1, pixels=0;
-    for (int rowblock=0; rowblock < img_h/3; rowblock++)
+    for (int row_block=0; pixels < steg_w * steg_h; row_block++)
     {
-        for (int colblock=0; colblock < img_w/3; colblock++)
+        for (int col_block=0; col_block < img_w/3; col_block++)
         {
-            total_groups++;
-            if (colblock < img_w) ++k;
+            if (col_block < img_w) ++k;
             int row = (key[k%strlen(key)]-'0'-1)%3;
             if (row < 0) continue;
             int col = (key[k%strlen(key)]-'0'-1)/3;
-            int posPixel = img_w*(rowblock*3 + row) + colblock*3 + col;
+            int posPixel = img_w*(row_block*3 + row) + col_block*3 + col;
             fseek(imgFile, posPixel, SEEK_SET);
             char byte = fgetc(imgFile);
             getBits(nbits, byte);
             if (++pixels == steg_w * steg_h) break;
         }
     }
-
-    #ifdef DEBUG
-    printf("total de bits: %d\n", total_bits);
-    printf("total de grupos: %d\n", total_groups);
-    #endif
 
     fclose(keyFile);
     fclose(imgFile);
@@ -91,7 +81,6 @@ void getBits(int nbits, char byte)
     {
         char bit = (byte >> i) & 0x01;
         bits[i] = bit;
-        total_bits++;
     }
 
     char outByte = convertToByte(bits);
