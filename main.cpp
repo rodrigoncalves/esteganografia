@@ -34,12 +34,14 @@ int main(int argc, char *argv[])
     nbits = atoi(argv[3]);
 
     keyFile = fopen("res/key.txt", "r");
-    outFile = fopen("out.y", "w+");
     if (keyFile == NULL)
     {
         printf("Couldn't open res/key.txt.\n");
         exit(0);
     }
+
+    outFile = fopen("out.y", "w+");
+    fprintf(outFile, "P5 %d %d 255 ", steg_w, steg_h);
 
     key = (char *) malloc(sizeof(char) * 100);
     fgets(key, 100, keyFile);
