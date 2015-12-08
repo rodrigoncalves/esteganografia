@@ -9,7 +9,7 @@
 FILE *outFile;
 char bits[8];
 int total_bits=0;
-int total_grupos=0;
+int total_groups=0;
 
 void getBits(int, char);
 char convertToByte(char*);
@@ -19,18 +19,18 @@ int main(int argc, char *argv[])
     FILE *keyFile;
     FILE *imgFile;
     char *key;
-    int width;
-    int height;
+    const int img_w = 1280, img_h = 720;
+    int steg_w, steg_h;
     int nbits;
 
     if (argc < 4)
     {
-        printf("Usage: ./main <width> <height> <bits>\n");
+        printf("Usage: ./main <steg-width> <steg-height> <nbits>\n");
         exit(0);
     }
 
-    width = atoi(argv[1]);
-    height = atoi(argv[2]);
+    steg_w = atoi(argv[1]);
+    steg_h = atoi(argv[2]);
     nbits = atoi(argv[3]);
 
     keyFile = fopen("res/key.txt", "r");
@@ -46,34 +46,33 @@ int main(int argc, char *argv[])
 
     // imgFile = fopen("res/teste_EsteganografiaLSB_1280x720_1bit.y", "r");
     imgFile = fopen("res/imagem_1280x720_imagemSteg_30x30_5bits.y", "r");
-    // imgFile = fopen("res/1280_720", "r");
-    // imgFile = fopen("res/44_6", "r");
     if (imgFile == NULL)
     {
         printf("Couldn't open image.\n");
         exit(0);
     }
 
-    int k=-1;
-    for (int rowblock=0; rowblock < height/3; rowblock++)
+    int k=-1, pixels=0;
+    for (int rowblock=0; rowblock < img_h/3; rowblock++)
     {
-        for (int colblock=0; colblock < width/3; colblock++)
+        for (int colblock=0; colblock < img_w/3; colblock++)
         {
-            total_grupos++;
-            if (colblock < width) ++k;
+            total_groups++;
+            if (colblock < img_w) ++k;
             int row = (key[k%strlen(key)]-'0'-1)%3;
             if (row < 0) continue;
             int col = (key[k%strlen(key)]-'0'-1)/3;
-            int posPixel = width*(rowblock*3 + row) + colblock*3 + col;
+            int posPixel = img_w*(rowblock*3 + row) + colblock*3 + col;
             fseek(imgFile, posPixel, SEEK_SET);
             char byte = fgetc(imgFile);
             getBits(nbits, byte);
+            if (++pixels == steg_w * steg_h) break;
         }
     }
 
     #ifdef DEBUG
     printf("total de bits: %d\n", total_bits);
-    printf("total de grupos: %d\n", total_grupos);
+    printf("total de grupos: %d\n", total_groups);
     #endif
 
     fclose(keyFile);
