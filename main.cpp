@@ -3,34 +3,35 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
-#include <vector>
 
-#define DEBUG
-using namespace std;
+// #define DEBUG
 
 FILE *outFile;
-vector<char> bits;
+char bits[8];
 int total_bits=0;
 int total_grupos=0;
 
 void getBits(int, char);
-char convertToByte(vector<char>);
+char convertToByte(char*);
 
 int main(int argc, char *argv[])
 {
+    FILE *keyFile;
+    FILE *imgFile;
+    char *key;
+    int width;
+    int height;
+    int nbits;
+
     if (argc < 4)
     {
         printf("Usage: ./main <width> <height> <bits>\n");
         exit(0);
     }
 
-    int width = atoi(argv[1]);
-    int height = atoi(argv[2]);
-    int nbits = atoi(argv[3]);
-
-    FILE *keyFile;
-    FILE *imgFile;
-    char *key;
+    width = atoi(argv[1]);
+    height = atoi(argv[2]);
+    nbits = atoi(argv[3]);
 
     keyFile = fopen("res/key.txt", "r");
     outFile = fopen("out.y", "w+");
@@ -67,11 +68,6 @@ int main(int argc, char *argv[])
             fseek(imgFile, posPixel, SEEK_SET);
             char byte = fgetc(imgFile);
             getBits(nbits, byte);
-
-            #ifdef DEBUG
-            printf("%d\n", posPixel);
-            // printf("%c\n", byte);
-            #endif
         }
     }
 
@@ -79,27 +75,6 @@ int main(int argc, char *argv[])
     printf("total de bits: %d\n", total_bits);
     printf("total de grupos: %d\n", total_grupos);
     #endif
-
-    if (not bits.empty())
-    {
-        int sizeToMove = CHAR_BIT - bits.size();
-
-        for (int i=0; i < bits.size()-CHAR_BIT; ++i)
-        {
-            #ifdef DEBUG
-            printf("%d", i+1);
-            #endif
-            bits.push_back(0);
-        }
-
-        #ifdef DEBUG
-        printf("\n");
-        #endif
-
-        char byte = convertToByte(bits);
-        byte >>= sizeToMove;
-        fprintf(outFile, "%c", byte);
-    }
 
     fclose(keyFile);
     fclose(imgFile);
@@ -114,19 +89,15 @@ void getBits(int nbits, char byte)
     for (int i = 0; i < nbits; ++i)
     {
         char bit = (byte >> i) & 0x01;
-        bits.push_back(bit);
+        bits[i] = bit;
         total_bits++;
-
-        if (bits.size() == CHAR_BIT)
-        {
-            char byte = convertToByte(bits);
-            fprintf(outFile, "%c", byte);
-            bits.clear();
-        }
     }
+
+    char outByte = convertToByte(bits);
+    fprintf(outFile, "%c", outByte);
 }
 
-char convertToByte(vector<char> bits)
+char convertToByte(char* bits)
 {
     unsigned char byte = 0x0;
     for (int i=7, j=0; i >= 0; --i, ++j)
