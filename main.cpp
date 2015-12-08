@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     steg_h = atoi(argv[2]);
     nbits = atoi(argv[3]);
 
-    keyFile = fopen("res/key.txt", "r");
+    keyFile = fopen("res/key2.txt", "r");
     if (keyFile == NULL)
     {
         printf("Couldn't open res/key.txt.\n");
@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 
     imgFile = fopen("res/imagem_1280x720_imagemSteg_30x30_5bits.y", "r");
     imgFile = fopen("res/video_1280x720_imagemSteg_1920x1080_4bits_chave1_comHash.y", "r");
+    imgFile = fopen("res/video_1280x720_imagemSteg_512x512_3bits_chave2_comHash.y", "r");
     if (imgFile == NULL)
     {
         printf("Couldn't open image.\n");
