@@ -4,6 +4,7 @@
 #include <math.h>
 #include <limits.h>
 #include <vector>
+#include <openssl/md5.h>
 
 FILE *outFile, *hashFile;
 std::vector<char> hash;
@@ -47,8 +48,8 @@ int main(int argc, char *argv[])
     fgets(key, 100, keyFile);
 
     imgFile = fopen("res/imagem_1280x720_imagemSteg_30x30_5bits.y", "r");
-    imgFile = fopen("res/video_1280x720_imagemSteg_1920x1080_4bits_chave1_comHash.y", "r");
-    imgFile = fopen("res/video_1280x720_imagemSteg_512x512_3bits_chave2_comHash.y", "r");
+    imgFile = fopen("res/video_1280x720_imagemSteg_1920x1080_4bits_chave1_comHash.y", "r+b");
+    imgFile = fopen("res/video_1280x720_imagemSteg_512x512_3bits_chave2_comHash.y", "r+b");
     if (imgFile == NULL)
     {
         printf("Couldn't open image.\n");
@@ -69,8 +70,14 @@ int main(int argc, char *argv[])
             char byte = fgetc(imgFile);
             getBits(nbits, byte);
             ++pixels;
-            if (hash_mode)
-                printf("%d: %d\n", posPixel, key[k%strlen(key)]-'0');
+            if (hash_mode) {
+                int position = ftell(imgFile);
+                char new_byte = byte & 0xF8; // 4 bits
+                fseek(imgFile, position-1, SEEK_SET);
+                fwrite(&new_byte, sizeof(char), sizeof(char), imgFile);
+                fseek(imgFile, position, SEEK_SET);
+            }
+
             if (pixels == steg_w * steg_h) {
                 hash_mode = 1;
             } else if (pixels == steg_w * steg_h + 32) {
@@ -78,6 +85,18 @@ int main(int argc, char *argv[])
             }
         }
     }
+
+    fseek(imgFile, 0, SEEK_SET);
+    MD5_CTX mdContext;
+    int bytes;
+    unsigned char data[1024];
+    unsigned char c[MD5_DIGEST_LENGTH];
+    MD5_Init(&mdContext);
+    while ((bytes = fread (data, 1, 1024, imgFile)) != 0)
+        MD5_Update(&mdContext, data, bytes);
+    MD5_Final (c, &mdContext);
+    for(int i = 0; i < MD5_DIGEST_LENGTH; i++) printf("%02x", c[i]);
+    printf("\n");
 
     fclose(keyFile);
     fclose(imgFile);
