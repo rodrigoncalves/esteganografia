@@ -1,12 +1,13 @@
 all:
+	mkdir -p bin/
 	@make client
 	@make server
 
 client:
-	g++ -o client main.cpp -std=c++11 -Wno-write-strings -lcrypto -g
+	g++ -o bin/client src/main.cpp -std=c++11 -Wno-write-strings -lcrypto -g
 
 server:
-	gcc -o server server.c -g -lpthread
+	gcc -o bin/server src/server.c -g -lpthread
 
 clean:
-	rm -f main server
+	rm -rf bin/ *.txt *.y

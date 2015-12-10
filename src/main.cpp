@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 
     if (argc < 6)
     {
-        printf("Usage: ./main <input-image> <key-file> <steg-width> <steg-height> <bits> <key-file> \n");
+        printf("Usage: ./client <input-image> <steg-width> <steg-height> <bits> <key-file> \n");
         exit(0);
     }
 
