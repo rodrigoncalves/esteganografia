@@ -67,7 +67,6 @@ int main(int argc, char *argv[])
     }
 
     digest = md5sum(imgFile);
-
     if (digest != stegHash) {
         printf("The file is unhealthy. The program will stop.\n");
     } else {
@@ -164,11 +163,12 @@ std::vector<char> md5sum(FILE *file)
         MD5_Update(&mdContext, data, bytes);
     }
     MD5_Final(c, &mdContext);
+    printf("MD5: ");
     for (int i = 0; i < MD5_DIGEST_LENGTH; i++) {
         digest.push_back(c[i]);
-        // printf("%02x", c[i]);
+        printf("%02x", c[i]);
     }
-    // printf("\n");
+    printf("\n");
 
     return digest;
 }
