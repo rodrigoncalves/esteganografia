@@ -10,6 +10,7 @@
 
 FILE *imgFile, *outFile, *keyFile, *hashFile;
 std::vector<char> hashBits;
+std::vector<char> stegHash;
 char stegBits[8];
 char *key;
 bool hash_mode = 0;
@@ -18,11 +19,13 @@ int steg_w, steg_h, nbits;
 void init(char* argv[]);
 void getBits(int, char);
 char convertToByte(char*);
-void exit();
+std::vector<char> md5sum(FILE*);
+void quit();
 
 int main(int argc, char *argv[])
 {
     const int img_w = 1280, img_h = 720;
+    std::vector<char> digest;
 
     if (argc < 6)
     {
@@ -63,19 +66,15 @@ int main(int argc, char *argv[])
         }
     }
 
-    fseek(imgFile, 0, SEEK_SET);
-    MD5_CTX mdContext;
-    int bytes;
-    unsigned char data[1024];
-    unsigned char digest[MD5_DIGEST_LENGTH];
-    MD5_Init(&mdContext);
-    while ((bytes = fread (data, 1, 1024, imgFile)) != 0)
-        MD5_Update(&mdContext, data, bytes);
-    MD5_Final (digest, &mdContext);
-    for (int i = 0; i < MD5_DIGEST_LENGTH; i++) printf("%02x", digest[i]);
-    printf("\n");
+    digest = md5sum(imgFile);
 
-    exit();
+    if (digest != stegHash) {
+        printf("The file is unhealthy. The program will stop.\n");
+    } else {
+        printf("The file is OK. Sending secret file to server.\n");
+    }
+
+    quit();
 
     return 0;
 }
@@ -120,6 +119,7 @@ void getBits(int nbits, char byte)
             {
                 char byte = convertToByte(&hashBits[0]);
                 fprintf(hashFile, "%c", byte);
+                stegHash.push_back(byte);
                 hashBits.clear();
             }
         }
@@ -149,7 +149,30 @@ char convertToByte(char* bits)
     return byte;
 }
 
-void exit()
+std::vector<char> md5sum(FILE *file)
+{
+
+    fseek(file, 0, SEEK_SET);
+    MD5_CTX mdContext;
+    int bytes;
+    unsigned char data[1024];
+    unsigned char c[MD5_DIGEST_LENGTH];
+    std::vector<char> digest;
+    MD5_Init(&mdContext);
+    while ((bytes = fread (data, 1, 1024, file)) != 0) {
+        MD5_Update(&mdContext, data, bytes);
+    }
+    MD5_Final(c, &mdContext);
+    for (int i = 0; i < MD5_DIGEST_LENGTH; i++) {
+        digest.push_back(c[i]);
+        // printf("%02x", c[i]);
+    }
+    // printf("\n");
+
+    return digest;
+}
+
+void quit()
 {
     fclose(keyFile);
     fclose(imgFile);
