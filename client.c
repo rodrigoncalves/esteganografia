@@ -30,9 +30,9 @@ int sendToServer(FILE *fp, char *ip = "127.0.0.1")
 
     char *buffer = (char *) malloc(fsize + 1);
     fread(buffer, fsize, sizeof(char), fp);
-    // fclose(fp);
+    fclose(fp);
 
-    FILE *test = fopen("test.txt", "w");
+    FILE *test = fopen("test.y", "w");
     fprintf(test, "%s\n", buffer);
 
     socket_d = setup(ip, PORT);
@@ -49,7 +49,24 @@ int sendToServer(FILE *fp, char *ip = "127.0.0.1")
         errx(1, "Error sending message to server");
     }
 
-    printf("Sent to server successfully!\n");
+    char *msg;
+    if (recv(socket_d, &length, sizeof(length), 0) == -1)    
+    {
+        close(socket_d);
+        errx(1, "Error sending message to server");
+    }
+
+    msg = (char *) malloc(length);
+    if (recv(socket_d, msg, length, 0) == -1)
+    {
+        close(socket_d);
+        errx(1, "Error sending message to server");
+    }
+
+    if (strcmp(msg, "OK") == 0)
+        printf("Sent to server successfully!\n");
+    else
+        printf("An error has occurred!\n");
 
     if (socket_d) close(socket_d);
     free(buffer);
