@@ -3,14 +3,14 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
-#include <vector>
 #include <openssl/md5.h>
+#include <vector>
+#include "client.c"
 
 #define HASH_SIZE 32
 
 FILE *imgFile, *outFile, *keyFile, *hashFile;
-std::vector<char> hashBits;
-std::vector<char> stegHash;
+std::vector<char> hashBits, stegHash;
 char stegBits[8];
 char *key;
 bool hash_mode = 0;
@@ -71,7 +71,8 @@ int main(int argc, char *argv[])
     if (digest != stegHash) {
         printf("The file is unhealthy. The program will stop.\n");
     } else {
-        printf("The file is OK. Sending secret file to server.\n");
+        printf("The file is OK. Sending secret file to server...\n");
+        sendToServer(outFile);
     }
 
     quit();
