@@ -88,7 +88,7 @@ int setup(int port)
 
 void *recvSecretFile()
 {
-    FILE *recvFile = fopen("secretfile.y", "w+");
+    FILE *recvFile = fopen("secretfile.y", "a+");
 
     while (1)
     {
@@ -109,17 +109,17 @@ void *recvSecretFile()
         if (recv(client_d, buffer, length, 0) == 0)
             continue;
 
-        fprintf(recvFile, "%s", buffer);
+        fwrite(buffer, sizeof(char), length, recvFile);
 
         char *msg = "OK";
-        length = strlen(msg);
-        if (write(client_d, &length, sizeof(length)) == -1)
+        int len = strlen(msg) + 1;
+        if (send(client_d, &len, sizeof(len), 0) == -1)
         {
-             close(client_d);
-             errx(1, "Error sending message");
+            close(client_d);
+            errx(1, "Error sending message to server");
         }
 
-        if (write(client_d, msg, length) == -1)
+        if (send(client_d, msg, len, 0) == -1)
         {
             close(client_d);
             errx(1, "Error sending message");

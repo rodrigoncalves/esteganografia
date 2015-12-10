@@ -28,48 +28,46 @@ int sendToServer(FILE *fp, char *ip = "127.0.0.1")
     long fsize = ftell(fp);
     rewind(fp);
 
-    char *buffer = (char *) malloc(fsize + 1);
-    fread(buffer, fsize, sizeof(char), fp);
-    fclose(fp);
 
-    FILE *test = fopen("test.y", "w");
-    fwrite(buffer, sizeof(char), fsize, test);
-
-    socket_d = setup(ip, PORT);
-    int length = fsize + 1;
-    if (write(socket_d, &length, sizeof(length)) == -1)
+    int length = 4096;
+    char buffer[4096];
+    int bytes = 0;
+    while ((bytes = fread(buffer, sizeof(char), length, fp)))
     {
-        close(socket_d);
-        errx(1, "Error sending message to server");
-    }
+        socket_d = setup(ip, PORT);
+        if (send(socket_d, &bytes, sizeof(bytes), 0) == -1)
+        {
+            close(socket_d);
+            printf("1 -");
+            errx(1, "Error sending message to server");
+        }
 
-    if (write(socket_d, buffer, length) == -1)
-    {
-        close(socket_d);
-        errx(1, "Error sending message to server");
-    }
+        if (send(socket_d, buffer, bytes, 0) == -1)
+        {
+            close(socket_d);
+            printf("2 -");
+            errx(1, "Error sending message to server");
+        }
 
-    char *msg;
-    if (recv(socket_d, &length, sizeof(length), 0) == -1)    
-    {
-        close(socket_d);
-        errx(1, "Error sending message to server");
-    }
+        char *msg;
+        int len;
+        if (recv(socket_d, &len, sizeof(len), 0) == -1)
+        {
+            close(socket_d);
+            errx(1, "Error receiving message");
+        }
 
-    msg = (char *) malloc(length);
-    if (recv(socket_d, msg, length, 0) == -1)
-    {
-        close(socket_d);
-        errx(1, "Error sending message to server");
-    }
+        msg = (char *) malloc(len);
+        if (recv(socket_d, msg, len, 0) == -1)
+        {
+            close(socket_d);
+            errx(1, "Error receiving message");
+        }
 
-    if (strcmp(msg, "OK") == 0)
-        printf("Sent to server successfully!\n");
-    else
-        printf("An error has occurred!\n");
+        if (strcmp("OK", msg) == 0) printf("%s\n", msg);
+    }
 
     if (socket_d) close(socket_d);
-    free(buffer);
 }
 
 int setup(char *ip, int port)
