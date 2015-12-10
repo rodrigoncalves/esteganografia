@@ -1,8 +1,7 @@
 obj/
 bin/
 *out*
-main
-prog
 hash*
 *.y
 server
+client
