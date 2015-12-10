@@ -17,9 +17,9 @@
 
 #define PORT 3013
 
-void quit(int);
+void quit();
 int setup(int);
-void *recvSecretFile(void*);
+void *recvSecretFile();
 
 char *ip = "127.0.0.1";
 int server_d = 0;
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void quit(int)
+void quit()
 {
     printf("\nBye\n");
 
@@ -86,7 +86,7 @@ int setup(int port)
     return socket_id;
 }
 
-void *recvSecretFile(void*)
+void *recvSecretFile()
 {
     FILE *recvFile = fopen("secretfile.y", "w+");
 

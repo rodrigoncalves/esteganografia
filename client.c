@@ -26,14 +26,14 @@ int sendToServer(FILE *fp, char *ip = "127.0.0.1")
 
     fseek(fp, 0, SEEK_END);
     long fsize = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
+    rewind(fp);
 
     char *buffer = (char *) malloc(fsize + 1);
     fread(buffer, fsize, sizeof(char), fp);
     fclose(fp);
 
     FILE *test = fopen("test.y", "w");
-    fprintf(test, "%s\n", buffer);
+    fwrite(buffer, sizeof(char), fsize, test);
 
     socket_d = setup(ip, PORT);
     int length = strlen(buffer) + 1;
