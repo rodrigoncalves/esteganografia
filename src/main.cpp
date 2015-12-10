@@ -21,11 +21,14 @@ void getBits(int, char);
 char convertToByte(char*);
 std::vector<char> md5sum(FILE*);
 void quit();
+void abort(int);
 
 int main(int argc, char *argv[])
 {
     const int img_w = 1280, img_h = 720;
     std::vector<char> digest;
+
+    signal(SIGINT, abort);
 
     if (argc < 6)
     {
@@ -180,4 +183,16 @@ void quit()
     fclose(outFile);
     fclose(hashFile);
     free(key);
+}
+
+void abort(int)
+{
+    printf("\nProgram aborted!\n");
+    long start_point = ftell(outFile);
+    long end_point = steg_w * steg_h + HASH_SIZE;
+    ftruncate(fileno(outFile), start_point);
+    ftruncate(fileno(outFile), end_point);
+    printf("Progress: %.1f%%\n", 100.0*start_point/end_point);
+    quit();
+    exit(0);
 }
