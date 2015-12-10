@@ -36,7 +36,7 @@ int sendToServer(FILE *fp, char *ip = "127.0.0.1")
     fwrite(buffer, sizeof(char), fsize, test);
 
     socket_d = setup(ip, PORT);
-    int length = strlen(buffer) + 1;
+    int length = fsize + 1;
     if (write(socket_d, &length, sizeof(length)) == -1)
     {
         close(socket_d);
